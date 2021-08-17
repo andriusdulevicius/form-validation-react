@@ -11,34 +11,30 @@ const SimpleInput = (props) => {
     reset: resetNameInput,
   } = useInput((value) => value.trim().length >= 3 && /^[a-zA-Z\s]*$/.test(value));
 
-  const [enteredEmail, setEnteredEmail] = useState('');
-  // const [enteredNameIsValid, setEnteredNameIsValid] = useState(false);
-  const [enteredEmailIsTouched, setEnteredEmailIsTouched] = useState(false);
-  const [formIsValid, setFormIsValid] = useState(false);
+  const {
+    value: enteredEmail,
+    isValid: enteredEmailIsValid,
+    hasError: emailInputHasError,
+    valueChangeHandler: emailChangeHandler,
+    valueBlurHandler: emailInputBlurHandler,
+    reset: resetEmailInput,
+  } = useInput((value) => {
+    const emailValidationRegex =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return emailValidationRegex.test(value);
+  });
 
-  const emailValidationRegex =
-    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  const enteredEmailIsValid = emailValidationRegex.test(enteredEmail);
-  const emailInputIsInvalid = !enteredEmailIsValid && enteredEmailIsTouched;
+  const [formIsValid, setFormIsValid] = useState(false);
 
   useEffect(() => {
     enteredNameIsValid && enteredEmailIsValid ? setFormIsValid(true) : setFormIsValid(false);
   }, [enteredNameIsValid, enteredEmailIsValid]); //use Effect pasikeis tik [] pasikeitus paduotoms value
 
-  const emailChangeHandler = (e) => {
-    setEnteredEmail(e.target.value);
-  };
-  const emailInputBlurHandler = () => {
-    setEnteredEmailIsTouched(true);
-  };
-
   const formSubmissionhandler = (e) => {
     e.preventDefault();
     if (!formIsValid) return;
     resetNameInput();
-    setEnteredEmail('');
-    setEnteredEmailIsTouched(false);
-
+    resetEmailInput();
     console.log({ enteredName, enteredEmail });
   };
 
@@ -51,7 +47,7 @@ const SimpleInput = (props) => {
           <p className='error-text'>Name must be at least 3 chars long and can contain only letters and spaces</p>
         )}
       </div>
-      <div className={'form-control ' + (emailInputIsInvalid && 'invalid')}>
+      <div className={'form-control ' + (emailInputHasError && 'invalid')}>
         <label htmlFor='name'>Your Email</label>
         <input
           onChange={emailChangeHandler}
@@ -60,7 +56,7 @@ const SimpleInput = (props) => {
           id='email'
           value={enteredEmail}
         />
-        {emailInputIsInvalid && <p className='error-text'>Enter a valid email</p>}
+        {emailInputHasError && <p className='error-text'>Enter a valid email</p>}
       </div>
       <div className='form-actions'>
         <button disabled={!formIsValid}>Submit</button>
