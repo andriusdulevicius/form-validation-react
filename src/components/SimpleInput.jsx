@@ -1,14 +1,21 @@
 import { useState, useEffect } from 'react';
+import useInput from '../hook/useInput';
+
 const SimpleInput = (props) => {
-  const [enteredName, setEnteredName] = useState('');
-  const [enteredNameIsTouched, setEnteredNameIsTouched] = useState(false);
+  const {
+    value: enteredName,
+    isValid: enteredNameIsValid,
+    hasError: nameInputHasError,
+    valueChangeHandler: nameChangeHandler,
+    valueBlurHandler: nameInputBlurHandler,
+    reset: resetNameInput,
+  } = useInput((value) => value.trim().length >= 3 && /^[a-zA-Z\s]*$/.test(value));
+
   const [enteredEmail, setEnteredEmail] = useState('');
   // const [enteredNameIsValid, setEnteredNameIsValid] = useState(false);
   const [enteredEmailIsTouched, setEnteredEmailIsTouched] = useState(false);
   const [formIsValid, setFormIsValid] = useState(false);
 
-  const enteredNameIsValid = enteredName.trim().length >= 3 && /^[a-zA-Z\s]*$/.test(enteredName);
-  const nameInputIsInvalid = !enteredNameIsValid && enteredNameIsTouched;
   const emailValidationRegex =
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const enteredEmailIsValid = emailValidationRegex.test(enteredEmail);
@@ -18,12 +25,6 @@ const SimpleInput = (props) => {
     enteredNameIsValid && enteredEmailIsValid ? setFormIsValid(true) : setFormIsValid(false);
   }, [enteredNameIsValid, enteredEmailIsValid]); //use Effect pasikeis tik [] pasikeitus paduotoms value
 
-  const nameChangeHandler = (e) => {
-    setEnteredName(e.target.value);
-  };
-  const nameInputBlurHandler = () => {
-    setEnteredNameIsTouched(true);
-  };
   const emailChangeHandler = (e) => {
     setEnteredEmail(e.target.value);
   };
@@ -33,12 +34,8 @@ const SimpleInput = (props) => {
 
   const formSubmissionhandler = (e) => {
     e.preventDefault();
-    //formos siuntimas reiskia , kad visi laukai yra paliesti
-    setEnteredNameIsTouched(true);
-    setEnteredEmailIsTouched(true);
     if (!formIsValid) return;
-    setEnteredName('');
-    setEnteredNameIsTouched(false);
+    resetNameInput();
     setEnteredEmail('');
     setEnteredEmailIsTouched(false);
 
@@ -47,10 +44,10 @@ const SimpleInput = (props) => {
 
   return (
     <form onSubmit={formSubmissionhandler}>
-      <div className={'form-control ' + (nameInputIsInvalid && 'invalid')}>
+      <div className={'form-control ' + (nameInputHasError && 'invalid')}>
         <label htmlFor='name'>Your Name</label>
         <input onChange={nameChangeHandler} onBlur={nameInputBlurHandler} type='text' id='name' value={enteredName} />
-        {nameInputIsInvalid && (
+        {nameInputHasError && (
           <p className='error-text'>Name must be at least 3 chars long and can contain only letters and spaces</p>
         )}
       </div>
