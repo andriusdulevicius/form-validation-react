@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 const SimpleInput = (props) => {
   const [enteredName, setEnteredName] = useState('');
+  const [enteredNameIsTouched, setEnteredNameIsTouched] = useState(false);
   const [enteredEmail, setEnteredEmail] = useState('');
   // const [enteredNameIsValid, setEnteredNameIsValid] = useState(false);
-  const [enteredNameIsTouched, setEnteredNameIsTouched] = useState(false);
   const [enteredEmailIsTouched, setEnteredEmailIsTouched] = useState(false);
   const [formIsValid, setFormIsValid] = useState(false);
 
-  const enteredNameIsValid = enteredName.trim().length >= 3;
+  const enteredNameIsValid = enteredName.trim().length >= 3 && /^[a-zA-Z\s]*$/.test(enteredName);
   const nameInputIsInvalid = !enteredNameIsValid && enteredNameIsTouched;
   const emailValidationRegex =
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -36,12 +36,13 @@ const SimpleInput = (props) => {
     //formos siuntimas reiskia , kad visi laukai yra paliesti
     setEnteredNameIsTouched(true);
     setEnteredEmailIsTouched(true);
-    if (!enteredNameIsValid) return;
+    if (!formIsValid) return;
     setEnteredName('');
     setEnteredNameIsTouched(false);
-    if (!enteredEmailIsValid) return;
     setEnteredEmail('');
     setEnteredEmailIsTouched(false);
+
+    console.log({ enteredName, enteredEmail });
   };
 
   return (
@@ -49,7 +50,9 @@ const SimpleInput = (props) => {
       <div className={'form-control ' + (nameInputIsInvalid && 'invalid')}>
         <label htmlFor='name'>Your Name</label>
         <input onChange={nameChangeHandler} onBlur={nameInputBlurHandler} type='text' id='name' value={enteredName} />
-        {nameInputIsInvalid && <p className='error-text'>Name must be at least 3 chars long</p>}
+        {nameInputIsInvalid && (
+          <p className='error-text'>Name must be at least 3 chars long and can contain only letters and spaces</p>
+        )}
       </div>
       <div className={'form-control ' + (emailInputIsInvalid && 'invalid')}>
         <label htmlFor='name'>Your Email</label>
